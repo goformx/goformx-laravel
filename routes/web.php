@@ -9,7 +9,7 @@ use Laravel\Fortify\Features;
 Route::get('forms/{id}', [PublicFormController::class, 'show'])->name('forms.fill');
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Home', [
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
