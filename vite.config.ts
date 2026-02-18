@@ -6,6 +6,18 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    server:
+        process.env.VITE_SERVER_URI
+            ? {
+                  origin: process.env.VITE_SERVER_URI,
+                  cors: {
+                      origin: [
+                          process.env.VITE_SERVER_URI,
+                          process.env.LARAVEL_APP_URL,
+                      ].filter(Boolean),
+                  },
+              }
+            : undefined,
     resolve: {
         alias: {
             '@goformx/formio': resolve(__dirname, 'node_modules/@goformx/formio'),
