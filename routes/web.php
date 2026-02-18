@@ -18,7 +18,7 @@ Route::get('dashboard', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('forms', [FormController::class, 'index'])->name('forms.index');
     Route::post('forms', [FormController::class, 'store'])->name('forms.store');
-    Route::get('forms/{id}', [FormController::class, 'show'])->name('forms.show');
+    Route::get('forms/{id}/edit', [FormController::class, 'edit'])->name('forms.edit');
     Route::put('forms/{id}', [FormController::class, 'update'])->name('forms.update');
     Route::delete('forms/{id}', [FormController::class, 'destroy'])->name('forms.destroy');
 });

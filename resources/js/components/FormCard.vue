@@ -8,7 +8,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { show } from '@/routes/forms';
+import { edit } from '@/routes/forms';
 
 interface Form {
     id?: string;
@@ -25,7 +25,7 @@ const props = defineProps<{
 }>();
 
 const formId = computed(() => props.form.id ?? props.form.ID ?? '');
-const editUrl = computed(() => (formId.value ? show.url({ id: formId.value }) : ''));
+const editUrl = computed(() => (formId.value ? edit.url({ id: formId.value }) : ''));
 const formattedDate = computed(() => {
     const raw = props.form.updated_at;
     if (!raw) return null;

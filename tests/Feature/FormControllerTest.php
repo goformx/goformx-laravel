@@ -52,7 +52,7 @@ test('index returns empty forms when API returns empty', function () {
     );
 });
 
-test('show returns Inertia Forms/Edit with form', function () {
+test('edit returns Inertia Forms/Edit with form', function () {
     Http::fake([
         '*/api/forms/abc-123' => Http::response([
             'data' => ['id' => 'abc-123', 'title' => 'My Form', 'description' => 'Test'],
@@ -63,7 +63,7 @@ test('show returns Inertia Forms/Edit with form', function () {
 
     $response = $this
         ->actingAs($user)
-        ->get(route('forms.show', 'abc-123'));
+        ->get(route('forms.edit', 'abc-123'));
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
@@ -73,14 +73,14 @@ test('show returns Inertia Forms/Edit with form', function () {
     );
 });
 
-test('show returns 404 when form does not exist', function () {
+test('edit returns 404 when form does not exist', function () {
     Http::fake(['*/api/forms/unknown' => Http::response([], 404)]);
 
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
-        ->get(route('forms.show', 'unknown'));
+        ->get(route('forms.edit', 'unknown'));
 
     $response->assertStatus(404);
 });
@@ -101,7 +101,7 @@ test('store creates form and redirects to form edit', function () {
             'description' => 'A new form',
         ]);
 
-    $response->assertRedirect(route('forms.show', 'new-id'));
+    $response->assertRedirect(route('forms.edit', 'new-id'));
     $response->assertSessionHas('success');
 });
 
@@ -160,14 +160,14 @@ test('index redirects with error when Go API returns 502', function () {
     $response->assertSessionHas('error', 'Form service temporarily unavailable.');
 });
 
-test('show redirects with error when Go API returns 502', function () {
+test('edit redirects with error when Go API returns 502', function () {
     Http::fake(['*/api/forms/abc-123' => Http::response(['error' => 'Bad Gateway'], 502)]);
 
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
-        ->get(route('forms.show', 'abc-123'));
+        ->get(route('forms.edit', 'abc-123'));
 
     $response->assertRedirect();
     $response->assertSessionHas('error', 'Form service temporarily unavailable.');

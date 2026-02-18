@@ -34,7 +34,7 @@ class FormController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $id): Response|RedirectResponse
+    public function edit(Request $request, string $id): Response|RedirectResponse
     {
         try {
             $client = $this->goFormsClient->withUser(auth()->user());
@@ -63,7 +63,7 @@ class FormController extends Controller
 
         $formId = $form['id'] ?? $form['ID'] ?? null;
 
-        return redirect()->route('forms.show', $formId)
+        return redirect()->route('forms.edit', $formId)
             ->with('success', 'Form created successfully.');
     }
 
