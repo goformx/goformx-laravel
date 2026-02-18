@@ -116,3 +116,20 @@ Laravel serves the home/landing page and the standalone form-fill page (`/forms/
 
 - **Laravel:** Feature tests for `GET /` (landing, 200, no Go calls) and `GET /forms/{id}` (valid id → form page; 404 from Go or missing → "Form not found"). Optionally test submit flow (success, 422, 429, 5xx) with mocked or real Go. Use existing Pest/Inertia patterns.
 - **Go:** Existing tests for embed, schema, validation, submit, and `/api/forms/*` remain. Add or adjust CORS tests if Laravel's origin is added to allowed origins.
+
+---
+
+## 6. Deployment
+
+### Reverse proxy
+
+In production, route by path so that:
+
+- **Laravel** receives: `/`, `/forms/{id}` (the standalone form-fill page only), `/dashboard`, `/login`, `/register`, and all other app routes. Do **not** send `/forms/:id/embed`, `/forms/:id/schema`, `/forms/:id/validation`, or `/forms/:id/submit` to Laravel.
+- **Go** receives: `/forms/:id/embed`, `/forms/:id/schema`, `/forms/:id/validation`, `/forms/:id/submit`, and `/api/forms/*`.
+
+Use path rules (e.g. by prefix and segment) so that the four public Go paths above are sent to Go; everything else under `/forms/` that is not one of those four goes to Laravel (e.g. `/forms/123` → Laravel, `/forms/123/schema` → Go).
+
+### CORS
+
+The standalone form-fill page is served by Laravel; the browser calls Go for `GET /forms/:id/schema` and `POST /forms/:id/submit`. If Go is on a different origin than the Laravel app, Go’s CORS configuration must allow Laravel’s origin (e.g. `APP_URL`) for those public endpoints (same as for the embed runtime). Add Laravel’s front-end origin to Go’s allowed CORS origins.
