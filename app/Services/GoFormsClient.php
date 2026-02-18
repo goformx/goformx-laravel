@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
@@ -38,10 +39,14 @@ class GoFormsClient
      */
     public function getForm(string $id): ?array
     {
-        $response = $this->get("/api/forms/{$id}");
+        try {
+            $response = $this->get("/api/forms/{$id}");
+        } catch (RequestException $e) {
+            if ($e->response && $e->response->status() === 404) {
+                return null;
+            }
 
-        if ($response->notFound()) {
-            return null;
+            throw $e;
         }
 
         return $response->json('data', $response->json());
@@ -102,7 +107,7 @@ class GoFormsClient
 
     private function get(string $url): Response
     {
-        return $this->request()->get($url);
+        return $this->request()->get($url)->throw();
     }
 
     /**
@@ -110,7 +115,7 @@ class GoFormsClient
      */
     private function post(string $url, array $data = []): Response
     {
-        return $this->request()->post($url, $data);
+        return $this->request()->post($url, $data)->throw();
     }
 
     /**
@@ -118,12 +123,12 @@ class GoFormsClient
      */
     private function put(string $url, array $data = []): Response
     {
-        return $this->request()->put($url, $data);
+        return $this->request()->put($url, $data)->throw();
     }
 
     private function delete(string $url): Response
     {
-        return $this->request()->delete($url);
+        return $this->request()->delete($url)->throw();
     }
 
     private function request(): PendingRequest
