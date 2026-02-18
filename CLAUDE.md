@@ -46,6 +46,31 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
+## GoFormX + Go Integration
+
+This app is the **frontend and identity layer**. Form domain (CRUD, schema, submissions) lives in a separate **Go service** (goforms). Laravel never touches form tables; it calls Go with signed assertions.
+
+### Architecture
+
+- **Laravel**: Auth (Fortify), sessions, Inertia/Vue UI, form builder. DB: users, sessions only.
+- **Go**: Form API (`/api/forms`), public embed/submit (`/forms/:id/...`). DB: forms, submissions, events.
+- **Auth to Go**: Laravel sends `X-User-Id`, `X-Timestamp`, `X-Signature` (HMAC-SHA256 of `user_id:timestamp`) on every request. Go verifies and uses `user_id` for ownership.
+
+### GoFormsClient
+
+- **Location**: `App\Services\GoFormsClient`
+- **Config**: `config('services.goforms.url')`, `config('services.goforms.secret')`. Env: `GOFORMS_API_URL`, `GOFORMS_SHARED_SECRET` (must match Go).
+- **Usage**: `GoFormsClient::fromConfig()->withUser(auth()->user())` then `listForms()`, `getForm($id)`, `createForm($data)`, `updateForm($id, $data)`, `deleteForm($id)`, `listSubmissions($formId)`, `getSubmission($formId, $sid)`.
+- **Signing**: All requests get signed headers; never call Go form APIs without the authenticated user.
+
+### Controllers and Errors
+
+- **FormController** is thin: auth user, call GoFormsClient, pass data to Inertia or redirect. Catch `RequestException` and map: 422 → validation, 404 → NotFoundHttpException, 5xx/connection → flash "Form service temporarily unavailable".
+
+### Design Doc
+
+Full architecture and API surface: `docs/plans/2026-02-18-goformx-laravel-go-split-design.md`.
+
 ## Frontend Bundling
 
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
