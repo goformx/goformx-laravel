@@ -17,6 +17,8 @@ class UpdateFormRequest extends FormRequest
         return [
             'title' => ['required', 'string'],
             'description' => ['nullable', 'string'],
+            'status' => ['nullable', 'string', 'in:draft,published,archived'],
+            'cors_origins' => ['nullable', 'string'],
             'schema' => ['nullable', 'array'],
         ];
     }
