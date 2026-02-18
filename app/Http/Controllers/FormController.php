@@ -36,8 +36,12 @@ class FormController extends Controller
 
     public function show(Request $request, string $id): Response|RedirectResponse
     {
-        $client = $this->goFormsClient->withUser(auth()->user());
-        $form = $client->getForm($id);
+        try {
+            $client = $this->goFormsClient->withUser(auth()->user());
+            $form = $client->getForm($id);
+        } catch (RequestException $e) {
+            return $this->handleGoError($e, $request);
+        }
 
         if ($form === null) {
             throw new NotFoundHttpException('Form not found.');
@@ -87,12 +91,23 @@ class FormController extends Controller
         return redirect()->route('forms.index')->with('success', 'Form deleted successfully.');
     }
 
+    /**
+     * Map Go API errors to user-facing responses.
+     *
+     * - 502/503, connection refused/timeout: "Form service temporarily unavailable"
+     * - 422: Inertia validation errors (redirect back with errors)
+     * - 404: NotFoundHttpException
+     * - 401: Log, treat as 500 (misconfiguration)
+     * - 5xx: Log, generic message
+     */
     private function handleGoError(RequestException $e, Request $request): RedirectResponse
     {
         if ($e->response === null) {
-            Log::error('GoForms API error (no response)', ['error' => $e->getMessage()]);
+            Log::error('GoForms API unreachable (connection refused, timeout)', ['error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'An unexpected error occurred.')->withInput();
+            return redirect()->back()
+                ->with('error', 'Form service temporarily unavailable.')
+                ->withInput();
         }
 
         $status = $e->response->status();
@@ -101,21 +116,81 @@ class FormController extends Controller
             throw new NotFoundHttpException('Resource not found.');
         }
 
-        if ($status === 422) {
-            $errors = $e->response->json('errors', $e->response->json('message', 'Validation failed.'));
-            if (is_array($errors)) {
-                throw ValidationException::withMessages($errors);
-            }
+        if ($status === 401) {
+            Log::error('GoForms API returned 401 (auth misconfiguration)', [
+                'path' => $request->path(),
+                'body' => $e->response->body(),
+            ]);
 
-            throw ValidationException::withMessages(['form' => is_string($errors) ? $errors : 'Validation failed.']);
+            return redirect()->back()
+                ->with('error', 'An unexpected error occurred. Please try again.')
+                ->withInput();
+        }
+
+        if (in_array($status, [400, 422], true)) {
+            $messages = $this->parseGoValidationErrors($e->response);
+            throw ValidationException::withMessages($messages);
         }
 
         if ($status >= 500) {
             Log::error('GoForms API server error', ['status' => $status, 'body' => $e->response->body()]);
 
-            return redirect()->back()->with('error', 'The service is temporarily unavailable. Try again later.')->withInput();
+            return redirect()->back()
+                ->with('error', 'Form service temporarily unavailable.')
+                ->withInput();
         }
 
-        return redirect()->back()->with('error', 'An error occurred. Please try again.')->withInput();
+        return redirect()->back()
+            ->with('error', 'An error occurred. Please try again.')
+            ->withInput();
+    }
+
+    /**
+     * Parse Go validation JSON to Laravel/Inertia format.
+     *
+     * Supports:
+     * - { errors: { field: [messages] } } (Laravel-style)
+     * - { data: { errors: [{ field, message }] } } (Go BuildMultipleErrorResponse)
+     * - { data: { field, message } } (Go BuildValidationErrorResponse)
+     *
+     * @return array<string, array<int, string>>
+     */
+    private function parseGoValidationErrors(\Illuminate\Http\Client\Response $response): array
+    {
+        $body = $response->json() ?? [];
+
+        $errors = $body['errors'] ?? null;
+        if (is_array($errors)) {
+            $normalized = [];
+            foreach ($errors as $field => $messages) {
+                $normalized[$field] = is_array($messages) ? array_values(array_map('strval', $messages)) : [strval($messages)];
+            }
+
+            if ($normalized !== []) {
+                return $normalized;
+            }
+        }
+
+        $dataErrors = $body['data']['errors'] ?? null;
+        if (is_array($dataErrors)) {
+            $normalized = [];
+            foreach ($dataErrors as $item) {
+                $field = $item['field'] ?? 'form';
+                $message = $item['message'] ?? 'Validation failed.';
+                $normalized[$field] = array_merge($normalized[$field] ?? [], [$message]);
+            }
+
+            if ($normalized !== []) {
+                return $normalized;
+            }
+        }
+
+        $field = $body['data']['field'] ?? null;
+        $message = $body['data']['message'] ?? $body['message'] ?? 'Validation failed.';
+        if (is_string($field) && is_string($message)) {
+            return [$field => [$message]];
+        }
+
+        return ['form' => [is_string($message) ? $message : 'Validation failed.']];
     }
 }

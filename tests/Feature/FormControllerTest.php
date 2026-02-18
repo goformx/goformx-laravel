@@ -144,7 +144,81 @@ test('index redirects with error when Go API returns 5xx', function () {
         ->get(route('forms.index'));
 
     $response->assertRedirect();
-    $response->assertSessionHas('error', 'The service is temporarily unavailable. Try again later.');
+    $response->assertSessionHas('error', 'Form service temporarily unavailable.');
+});
+
+test('index redirects with error when Go API returns 502', function () {
+    Http::fake(['*/api/forms' => Http::response(['error' => 'Bad Gateway'], 502)]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.index'));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error', 'Form service temporarily unavailable.');
+});
+
+test('show redirects with error when Go API returns 502', function () {
+    Http::fake(['*/api/forms/abc-123' => Http::response(['error' => 'Bad Gateway'], 502)]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.show', 'abc-123'));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error', 'Form service temporarily unavailable.');
+});
+
+test('store returns validation errors when Go API returns 422 with errors object', function () {
+    Http::fake([
+        '*/api/forms' => Http::response([
+            'errors' => [
+                'title' => ['The title field is required.'],
+                'description' => ['Description is too long.'],
+            ],
+        ], 422),
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('forms.store'), [
+            'title' => 'Valid Title',
+            'description' => 'Passes Laravel validation',
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasErrors(['title', 'description']);
+});
+
+test('store returns validation errors when Go API returns 422 with data.errors array', function () {
+    Http::fake([
+        '*/api/forms' => Http::response([
+            'data' => [
+                'errors' => [
+                    ['field' => 'title', 'message' => 'Title is required'],
+                    ['field' => 'title', 'message' => 'Title must be at least 3 characters'],
+                ],
+            ],
+        ], 422),
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->post(route('forms.store'), [
+            'title' => 'Valid Title',
+            'description' => null,
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHasErrors(['title']);
 });
 
 test('forms routes require authentication', function () {
