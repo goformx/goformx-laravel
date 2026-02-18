@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DemoController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\PublicFormController;
 use Illuminate\Support\Facades\Route;
@@ -7,6 +8,8 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 Route::get('forms/{id}', [PublicFormController::class, 'show'])->name('forms.fill');
+
+Route::get('demo', DemoController::class)->name('demo');
 
 Route::get('/', function () {
     return Inertia::render('Home', [
