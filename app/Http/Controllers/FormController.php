@@ -128,6 +128,27 @@ class FormController extends Controller
         ]);
     }
 
+    public function embed(Request $request, string $id): Response|RedirectResponse
+    {
+        try {
+            $client = $this->goFormsClient->withUser(auth()->user());
+            $form = $client->getForm($id);
+        } catch (RequestException $e) {
+            return $this->handleGoError($e, $request);
+        }
+
+        if ($form === null) {
+            throw new NotFoundHttpException('Form not found.');
+        }
+
+        $embedBaseUrl = rtrim(config('services.goforms.public_url', config('services.goforms.url')), '/');
+
+        return Inertia::render('Forms/Embed', [
+            'form' => $form,
+            'embed_base_url' => $embedBaseUrl,
+        ]);
+    }
+
     public function store(StoreFormRequest $request): RedirectResponse
     {
         try {
