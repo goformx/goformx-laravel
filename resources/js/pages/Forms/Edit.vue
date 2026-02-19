@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
-import { useForm, router, Link } from '@inertiajs/vue3';
+import { Head, useForm, router, Link } from '@inertiajs/vue3';
 import { Formio } from '@formio/js';
 import goforms from '@goformx/formio';
 import AppLayout from '@/layouts/AppLayout.vue';
