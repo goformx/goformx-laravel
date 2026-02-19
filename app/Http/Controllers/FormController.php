@@ -52,6 +52,24 @@ class FormController extends Controller
         ]);
     }
 
+    public function preview(Request $request, string $id): Response|RedirectResponse
+    {
+        try {
+            $client = $this->goFormsClient->withUser(auth()->user());
+            $form = $client->getForm($id);
+        } catch (RequestException $e) {
+            return $this->handleGoError($e, $request);
+        }
+
+        if ($form === null) {
+            throw new NotFoundHttpException('Form not found.');
+        }
+
+        return Inertia::render('Forms/Preview', [
+            'form' => $form,
+        ]);
+    }
+
     public function store(StoreFormRequest $request): RedirectResponse
     {
         try {
