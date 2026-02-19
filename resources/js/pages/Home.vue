@@ -100,53 +100,45 @@ const features = [
                 class="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden py-20 md:py-32"
             >
                 <div
-                    class="absolute inset-0 bg-gradient-to-b from-background via-background to-background/80"
+                    class="absolute inset-0 bg-[linear-gradient(to_bottom,hsl(var(--background)),hsl(var(--muted)/0.4))]"
                 />
-                <div class="absolute inset-0 overflow-hidden">
-                    <div
-                        class="absolute top-[20%] left-[10%] h-[500px] w-[500px] rounded-full bg-indigo-500/15 blur-3xl"
-                    />
-                    <div
-                        class="absolute bottom-[10%] right-[10%] h-[400px] w-[400px] rounded-full bg-purple-500/15 blur-3xl"
-                    />
-                    <div
-                        class="absolute right-[30%] top-1/2 h-[300px] w-[300px] rounded-full bg-violet-500/10 blur-3xl"
-                    />
-                </div>
+                <div
+                    class="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,hsl(var(--brand)/0.08),transparent_50%)]"
+                />
+                <div
+                    class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"
+                />
                 <div class="container relative z-10">
                     <div class="flex flex-col items-center text-center">
                         <h1
-                            class="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+                            class="font-display text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl [animation:hero-in_0.6s_ease-out_both]"
                         >
-                            <span
-                                class="bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent"
-                            >
-                                Your Forms,
-                            </span>
+                            <span class="text-foreground">Your Forms,</span>
                             <br />
                             <span
-                                class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent italic"
+                                class="text-[hsl(var(--brand))] [animation:hero-in_0.6s_ease-out_0.08s_both]"
                             >
                                 Our Backend
                             </span>
                         </h1>
                         <p
-                            class="mt-6 max-w-[42rem] text-lg text-muted-foreground sm:text-xl"
+                            class="mt-6 max-w-[42rem] text-lg text-muted-foreground sm:text-xl [animation:hero-in_0.5s_ease-out_0.15s_both]"
                         >
-                            Build and host forms with Laravel and Go. Dashboard
-                            and form builder in Laravel; form API and public
-                            submit in Go.
+                            Build and host forms. Visual dashboard and form
+                            builder; form API and public submit for embeds.
                         </p>
-                        <p class="mt-2 text-sm text-muted-foreground/70">
+                        <p
+                            class="mt-2 text-sm text-muted-foreground/70 [animation:hero-in_0.5s_ease-out_0.2s_both]"
+                        >
                             No lock-in. Self-host or use the API.
                         </p>
                         <div
-                            class="mt-8 flex flex-col gap-4 sm:flex-row"
+                            class="mt-10 flex flex-col gap-4 sm:flex-row [animation:hero-in_0.5s_ease-out_0.25s_both]"
                         >
                             <Button
                                 v-if="canRegister"
                                 size="lg"
-                                class="border-0 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+                                variant="brand"
                                 as-child
                             >
                                 <Link :href="register()">Get started</Link>
@@ -154,7 +146,7 @@ const features = [
                             <Button
                                 v-else
                                 size="lg"
-                                class="border-0 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+                                variant="brand"
                                 as-child
                             >
                                 <Link :href="login()">Log in</Link>
@@ -179,13 +171,15 @@ const features = [
             </section>
 
             <!-- Features -->
-            <section class="relative py-20">
+            <section class="relative py-24">
                 <div
-                    class="absolute inset-0 bg-gradient-to-b from-transparent via-muted/30 to-transparent"
+                    class="absolute inset-0 bg-gradient-to-b from-transparent via-muted/20 to-transparent"
                 />
                 <div class="container relative z-10">
-                    <div class="mb-12 text-center">
-                        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                    <div class="mb-14 text-center">
+                        <h2
+                            class="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+                        >
                             Everything You Need
                         </h2>
                         <p class="mt-4 text-lg text-muted-foreground">
@@ -194,17 +188,20 @@ const features = [
                     </div>
                     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <Card
-                            v-for="feature in features"
+                            v-for="(feature, i) in features"
                             :key="feature.title"
-                            class="border-border/50 bg-card/50 transition-all duration-300 hover:border-border hover:bg-card/70 backdrop-blur-sm"
+                            class="border-border/50 bg-card/80 transition-all duration-300 hover:border-border hover:bg-card hover:shadow-md backdrop-blur-sm"
+                            :style="{
+                                animation: `card-in 0.5s ease-out ${0.05 * i}s both`,
+                            }"
                         >
                             <CardHeader>
                                 <div
-                                    class="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20"
+                                    class="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]"
                                 >
                                     <component
                                         :is="feature.icon"
-                                        class="h-6 w-6 text-indigo-400"
+                                        class="h-6 w-6"
                                     />
                                 </div>
                                 <CardTitle>{{ feature.title }}</CardTitle>
@@ -218,15 +215,15 @@ const features = [
             </section>
 
             <!-- CTA -->
-            <section class="relative py-20">
-                <div class="absolute inset-0 overflow-hidden">
-                    <div
-                        class="absolute left-1/2 top-1/2 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-3xl"
-                    />
-                </div>
+            <section class="relative py-24">
+                <div
+                    class="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_100%,hsl(var(--brand)/0.06),transparent)]"
+                />
                 <div class="container relative z-10">
                     <div class="flex flex-col items-center text-center">
-                        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                        <h2
+                            class="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+                        >
                             Ready to Get Started?
                         </h2>
                         <p
@@ -235,11 +232,11 @@ const features = [
                             Create your first form in minutes. No credit card
                             required.
                         </p>
-                        <div class="mt-8">
+                        <div class="mt-10">
                             <Button
                                 v-if="$page.props.auth?.user"
                                 size="lg"
-                                class="border-0 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+                                variant="brand"
                                 as-child
                             >
                                 <Link :href="dashboard()">Go to Dashboard</Link>
@@ -247,7 +244,7 @@ const features = [
                             <Button
                                 v-else-if="canRegister"
                                 size="lg"
-                                class="border-0 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+                                variant="brand"
                                 as-child
                             >
                                 <Link :href="register()"
@@ -257,7 +254,7 @@ const features = [
                             <Button
                                 v-else
                                 size="lg"
-                                class="border-0 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+                                variant="brand"
                                 as-child
                             >
                                 <Link :href="login()">Log in</Link>
@@ -269,3 +266,26 @@ const features = [
         </main>
     </div>
 </template>
+
+<style scoped>
+@keyframes hero-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>

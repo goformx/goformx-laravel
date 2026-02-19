@@ -10,6 +10,8 @@ export const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground hover:bg-primary/90",
+        brand:
+          "bg-[hsl(var(--brand))] text-[hsl(var(--brand-foreground))] hover:opacity-90 focus-visible:ring-[hsl(var(--brand))]/50 dark:bg-[hsl(var(--brand))] dark:text-[hsl(var(--brand-foreground))]",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

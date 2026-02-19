@@ -109,8 +109,11 @@ onMounted(async () => {
 
 <template>
     <Head :title="`Form`" />
-    <div class="min-h-screen bg-background p-6">
-        <div class="mx-auto max-w-2xl space-y-4">
+    <div class="relative min-h-screen bg-background p-6">
+        <div
+            class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,hsl(var(--brand)/0.04),transparent_60%)]"
+        />
+        <div class="relative mx-auto max-w-2xl space-y-4">
             <Alert v-if="errorMessage" variant="destructive">
                 <AlertCircle class="h-4 w-4" />
                 <AlertDescription>{{ errorMessage }}</AlertDescription>
@@ -118,22 +121,35 @@ onMounted(async () => {
 
             <div
                 v-if="status === 'success'"
-                class="rounded-lg border border-border bg-card p-6 text-center"
+                class="rounded-xl border border-border bg-card p-8 text-center shadow-sm"
             >
-                <CheckCircle2 class="mx-auto mb-2 h-12 w-12 text-green-600" />
-                <h2 class="text-lg font-semibold">Thank you</h2>
-                <p class="text-muted-foreground">Your response has been submitted.</p>
+                <div
+                    class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]"
+                >
+                    <CheckCircle2 class="h-8 w-8" />
+                </div>
+                <h2 class="font-display text-xl font-semibold tracking-tight">
+                    Thank you
+                </h2>
+                <p class="mt-1 text-muted-foreground">
+                    Your response has been submitted.
+                </p>
             </div>
 
             <div
                 v-show="status === 'loading' || status === 'form'"
-                class="rounded-lg border border-border bg-card p-6"
+                class="rounded-xl border border-border bg-card p-6 shadow-sm"
             >
                 <div
                     v-if="status === 'loading'"
-                    class="py-12 text-center text-muted-foreground"
+                    class="flex flex-col items-center justify-center gap-3 py-14"
                 >
-                    Loading form…
+                    <div
+                        class="h-8 w-8 animate-pulse rounded-full bg-[hsl(var(--brand)/0.2)]"
+                    />
+                    <p class="text-sm text-muted-foreground">
+                        Loading form…
+                    </p>
                 </div>
                 <div id="form-fill-container" class="min-h-[200px]" />
             </div>

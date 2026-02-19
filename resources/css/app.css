@@ -9,7 +9,11 @@
 
 @theme inline {
     --font-sans:
-        Instrument Sans, ui-sans-serif, system-ui, sans-serif,
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+    --font-display:
+        Fraunces, ui-serif, Georgia, serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
@@ -51,6 +55,9 @@
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
 
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+
     --color-sidebar: var(--sidebar-background);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -79,6 +86,12 @@
     }
 }
 
+@layer components {
+    .container {
+        margin-inline: auto;
+    }
+}
+
 @layer utilities {
     body,
     html {
@@ -86,6 +99,9 @@
             'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
             'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
             'Noto Color Emoji';
+    }
+    .font-display {
+        font-family: var(--font-display);
     }
 }
 
@@ -115,6 +131,8 @@
     --chart-4: hsl(43 74% 66%);
     --chart-5: hsl(27 87% 67%);
     --radius: 0.5rem;
+    --brand: 168 76% 32%;
+    --brand-foreground: 0 0% 100%;
     --sidebar-background: hsl(0 0% 98%);
     --sidebar-foreground: hsl(240 5.3% 26.1%);
     --sidebar-primary: hsl(0 0% 10%);
@@ -127,6 +145,8 @@
 }
 
 .dark {
+    --brand: 168 55% 45%;
+    --brand-foreground: 0 0% 100%;
     --background: hsl(0 0% 3.9%);
     --foreground: hsl(0 0% 98%);
     --card: hsl(0 0% 3.9%);

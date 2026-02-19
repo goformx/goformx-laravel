@@ -84,6 +84,7 @@ import { store } from '@/routes/register';
 
                 <Button
                     type="submit"
+                    variant="brand"
                     class="mt-2 w-full"
                     tabindex="5"
                     :disabled="processing"

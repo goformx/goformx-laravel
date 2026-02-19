@@ -39,6 +39,7 @@ import { store } from '@/routes/password/confirm';
 
                 <div class="flex items-center">
                     <Button
+                        variant="brand"
                         class="w-full"
                         :disabled="processing"
                         data-test="confirm-password-button"
