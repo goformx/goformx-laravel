@@ -225,3 +225,163 @@ test('forms routes require authentication', function () {
     $response = $this->get(route('forms.index'));
     $response->assertRedirect(route('login'));
 });
+
+test('preview returns Inertia Forms/Preview with form', function () {
+    Http::fake([
+        '*/api/forms/abc-123' => Http::response([
+            'data' => [
+                'id' => 'abc-123',
+                'title' => 'My Form',
+                'schema' => ['display' => 'form', 'components' => []],
+            ],
+        ]),
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.preview', 'abc-123'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Forms/Preview')
+        ->where('form.title', 'My Form')
+        ->where('form.id', 'abc-123')
+    );
+});
+
+test('preview returns 404 when form does not exist', function () {
+    Http::fake(['*/api/forms/unknown' => Http::response([], 404)]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.preview', 'unknown'));
+
+    $response->assertStatus(404);
+});
+
+test('submissions returns Inertia Forms/Submissions with form and submissions', function () {
+    Http::fake([
+        '*/api/forms/abc-123' => Http::response([
+            'data' => ['id' => 'abc-123', 'title' => 'My Form'],
+        ]),
+        '*/api/forms/abc-123/submissions' => Http::response([
+            'data' => [
+                'submissions' => [
+                    ['id' => 'sub-1', 'submitted_at' => '2026-02-18T12:00:00Z', 'status' => 'pending'],
+                ],
+                'count' => 1,
+            ],
+        ]),
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.submissions', 'abc-123'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Forms/Submissions')
+        ->where('form.title', 'My Form')
+        ->has('submissions')
+    );
+});
+
+test('submissions returns 404 when form does not exist', function () {
+    Http::fake(['*/api/forms/unknown' => Http::response([], 404)]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.submissions', 'unknown'));
+
+    $response->assertStatus(404);
+});
+
+test('submission show returns Inertia Forms/SubmissionShow with form and submission', function () {
+    Http::fake([
+        '*/api/forms/abc-123' => Http::response([
+            'data' => ['id' => 'abc-123', 'title' => 'My Form'],
+        ]),
+        '*/api/forms/abc-123/submissions/sub-1' => Http::response([
+            'data' => [
+                'id' => 'sub-1',
+                'form_id' => 'abc-123',
+                'status' => 'pending',
+                'submitted_at' => '2026-02-18T12:00:00Z',
+                'data' => ['email' => 'test@example.com'],
+            ],
+        ]),
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.submissions.show', ['id' => 'abc-123', 'sid' => 'sub-1']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Forms/SubmissionShow')
+        ->where('form.title', 'My Form')
+        ->where('submission.id', 'sub-1')
+    );
+});
+
+test('submission show returns 404 when submission does not exist', function () {
+    Http::fake([
+        '*/api/forms/abc-123' => Http::response([
+            'data' => ['id' => 'abc-123', 'title' => 'My Form'],
+        ]),
+        '*/api/forms/abc-123/submissions/unknown' => Http::response([], 404),
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.submissions.show', ['id' => 'abc-123', 'sid' => 'unknown']));
+
+    $response->assertStatus(404);
+});
+
+test('embed returns Inertia Forms/Embed with form and embed_base_url', function () {
+    Http::fake([
+        '*/api/forms/abc-123' => Http::response([
+            'data' => ['id' => 'abc-123', 'title' => 'My Form'],
+        ]),
+    ]);
+
+    config(['services.goforms.public_url' => 'https://forms.example.com']);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.embed', 'abc-123'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Forms/Embed')
+        ->where('form.title', 'My Form')
+        ->where('embed_base_url', 'https://forms.example.com')
+    );
+});
+
+test('embed returns 404 when form does not exist', function () {
+    Http::fake(['*/api/forms/unknown' => Http::response([], 404)]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('forms.embed', 'unknown'));
+
+    $response->assertStatus(404);
+});
